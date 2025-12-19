@@ -119,6 +119,120 @@ Unequal true positive rates across groups.
 - **Equalized odds**  
 Unequal true positive and false positive rates across groups.
 
+# 📈 Unfair Regression Support
+
+In addition to classification, **Unfair Data Generator** supports **regression datasets with controlled unfairness**.
+
+The regression generator reuses the unfair classification pipeline to generate:
+
+- **Feature matrix (`X`)**
+- **Sensitive group labels (`Z`)**
+
+A continuous target variable **`y`** is then generated with **group-dependent behavior**, enabling systematic fairness violations in regression tasks.
+
+---
+
+## Regression Data Generation
+
+The regression target is constructed as:
+
+- A shared base signal derived from informative features
+- Plus **group-specific bias and/or noise**
+
+This allows precise control over how unfairness manifests across sensitive groups.
+
+---
+
+## Regression Fairness Types
+
+The following unfairness scenarios are supported:
+
+### **Equal MSE**
+All sensitive groups have:
+- Similar noise levels
+- No systematic bias
+
+This represents a **fair regression setting**, where group-level performance should be comparable.
+
+---
+
+### **Group Bias**
+Each sensitive group has a **systematic shift** in the target value.
+
+This causes:
+- Consistent overestimation for some groups
+- Consistent underestimation for others
+
+This scenario models structural bias in regression targets.
+
+---
+
+### **Heteroscedastic Noise**
+Different sensitive groups have **different noise levels**.
+
+As a result:
+- Some groups are inherently harder to predict
+- Predictive uncertainty varies across groups
+
+This reflects unequal data quality or measurement noise.
+
+---
+
+## Regression Fairness Metrics
+
+Regression fairness is evaluated **per sensitive group** using the following metrics:
+
+### **Mean Squared Error (MSE)**
+Measures the average squared prediction error.
+
+- Penalizes large errors more strongly
+- Higher values indicate worse predictive performance
+
+---
+
+### **Mean Absolute Error (MAE)**
+Measures the average absolute prediction error.
+
+- More interpretable than MSE
+- Indicates typical prediction deviation
+
+---
+
+### **Bias**
+
+Measures systematic prediction error:
+
+**Bias = E[ŷ − y]**
+
+- **Positive bias** → systematic overestimation  
+- **Negative bias** → systematic underestimation  
+
+Bias reveals whether a model consistently favors or disadvantages certain groups.
+---
+
+Differences in **MSE**, **MAE**, or **Bias** across sensitive groups indicate **unfair regression behavior**, even when overall performance appears acceptable.
+
+---
+
+## Example: Unfair Regression
+
+```python
+from unfair_data_generator.unfair_regression import make_unfair_regression
+from unfair_data_generator.util.regression_trainer import train_and_evaluate_regression
+
+X, y, Z = make_unfair_regression(
+    n_samples=1000,
+    n_features=10,
+    n_informative=3,
+    fairness_type="Group bias",
+    n_sensitive_groups=3,
+    random_state=42
+)
+
+metrics = train_and_evaluate_regression(X, y, Z)
+print(metrics)
+```
+
 ## 🫂 Community Guidelines
 ### Contributing
 To contribure to the software, please read the [contributing guidelines](./CONTRIBUTING.md).

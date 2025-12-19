@@ -14,6 +14,7 @@ def make_unfair_regression(
     noise=0.1,
     random_state=None,
     fairness_type="Equal MSE",
+    base_function="linear",
     group_params=None,
     n_sensitive_groups=2,
     return_sensitive_group_centroids=False
@@ -22,16 +23,23 @@ def make_unfair_regression(
     Generate an unfair regression dataset by reusing the unfair classification
     generator for X and Z, and generating a group-dependent regression target y.
 
-    Returns:
-        X : ndarray
-        y : ndarray (continuous)
-        Z : ndarray (sensitive groups)
-        centroids (optional)
+    Parameters
+    ----------
+    base_function : {"linear", "logistic", "exponential"}
+        Functional form used to generate the base regression signal shared
+        across all sensitive groups.
+
+    Returns
+    -------
+    X : ndarray
+    y : ndarray (continuous)
+    Z : ndarray (sensitive groups)
+    centroids : optional
     """
 
     rng = np.random.default_rng(random_state)
 
-    # 1️⃣ Generate X and Z using classification generator
+    # 1. Generate X and Z using classification generator
     X, _, Z, centroids = make_unfair_classification(
         n_samples=n_samples,
         n_features=n_features,
@@ -43,11 +51,26 @@ def make_unfair_regression(
         return_sensitive_group_centroids=True
     )
 
-    # 2️⃣ Generate base regression signal
+    # 2. Generate base regression signal (shared across groups)
     w = rng.normal(size=n_informative)
-    base_signal = X[:, :n_informative] @ w
+    linear_signal = X[:, :n_informative] @ w
 
-    # 3️⃣ Group-specific bias and noise
+    if base_function == "linear":
+        base_signal = linear_signal
+
+    elif base_function == "logistic":
+        base_signal = 1.0 / (1.0 + np.exp(-linear_signal))
+
+    elif base_function == "exponential":
+        base_signal = np.exp(linear_signal)
+
+    else:
+        raise ValueError(
+            f"Unsupported base_function: {base_function}. "
+            "Choose from {'linear', 'logistic', 'exponential'}."
+        )
+
+    # 3. Group-specific bias and noise
     y = np.zeros(n_samples)
     unique_groups = np.unique(Z)
 
