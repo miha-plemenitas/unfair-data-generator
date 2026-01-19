@@ -1,6 +1,6 @@
-from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.metrics import accuracy_score, confusion_matrix, mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.metrics import recall_score
 
 try:
@@ -131,5 +131,54 @@ def train_and_evaluate_model_with_classifier(X, y, Z):
             }
         }
         metrics[group_name] = group_metrics
+
+    return metrics
+
+
+def train_and_evaluate_model_with_regressor(X, y, Z):
+    """
+    Train a Random Forest regressor and evaluate regression performance across sensitive groups.
+
+    Parameters:
+        X (ndarray): Feature matrix.
+        y (ndarray): Continuous target values.
+        Z (ndarray): Sensitive group labels per sample.
+
+    Returns:
+        dict: Metrics per group with keys:
+            - 'MAE'
+            - 'RMSE'
+            - 'Mean residual'
+            - 'R2'
+            - 'Samples'
+    """
+    X_train, X_test, y_train, y_test, Z_train, Z_test = train_test_split(
+        X, y, Z, test_size=0.3, random_state=42
+    )
+
+    reg = RandomForestRegressor(random_state=42)
+    reg.fit(X_train, y_train)
+
+    y_pred = reg.predict(X_test)
+
+    metrics = {}
+    all_groups = np.unique(Z)
+
+    for group in np.unique(Z_test):
+        mask = Z_test == group
+        group_name = get_group_name(all_groups, group)
+
+        mae = mean_absolute_error(y_test[mask], y_pred[mask])
+        rmse = mean_squared_error(y_test[mask], y_pred[mask], squared=False)
+        mean_residual = float(np.mean(y_pred[mask] - y_test[mask]))
+        r2 = r2_score(y_test[mask], y_pred[mask])
+
+        metrics[group_name] = {
+            "MAE": mae,
+            "RMSE": rmse,
+            "Mean residual": mean_residual,
+            "R2": r2,
+            "Samples": int(mask.sum()),
+        }
 
     return metrics

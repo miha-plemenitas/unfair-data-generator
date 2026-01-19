@@ -83,6 +83,37 @@ def visualize_accuracy(metrics, title):
     return plt
 
 
+def visualize_regression_metrics(metrics, title):
+    """
+    Create bar charts to visualize MAE, RMSE, and mean residual by group.
+
+    Parameters:
+        metrics (dict): Dictionary with per-group regression metrics.
+        title (str): Title for the plot.
+
+    Returns:
+        matplotlib.pyplot: The matplotlib pyplot object containing the plot.
+    """
+    groups = list(metrics.keys())
+    mae = [metrics[group]["MAE"] for group in groups]
+    rmse = [metrics[group]["RMSE"] for group in groups]
+    mean_residual = [metrics[group]["Mean residual"] for group in groups]
+
+    x = np.arange(len(groups))
+    width = 0.25
+
+    plt.figure(figsize=(10, 6))
+    plt.bar(x - width, mae, width=width, label="MAE")
+    plt.bar(x, rmse, width=width, label="RMSE")
+    plt.bar(x + width, mean_residual, width=width, label="Mean residual")
+    plt.xticks(x, groups)
+    plt.ylabel("Value")
+    plt.title(title)
+    plt.legend()
+
+    return plt
+
+
 def visualize_groups_separately(X, y, Z, feature1=None, feature2=None, feature1_name=None, feature2_name=None, title="Group-specific visualization"):
     """
     Generate scatter plots for individual groups, showing data points for each class.

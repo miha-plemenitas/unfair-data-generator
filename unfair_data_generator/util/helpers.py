@@ -344,6 +344,60 @@ def get_params_for_certain_equality_type(equality_type, sensitive_group_count):
                          f"'Equal opportunity', 'Equalized odds'")
 
 
+def get_params_for_certain_regression_type(fairness_type, sensitive_group_count):
+    """
+    Generate group-specific parameters for regression unfairness types.
+
+    Parameters:
+        fairness_type (str): The regression fairness criterion to simulate. Supported values:
+
+            - "Equal MSE"
+                Same noise scale and zero bias across groups.
+
+            - "Group bias"
+                Different constant bias per group with equal noise scale.
+
+            - "Heteroscedastic noise"
+                Different noise scales per group with zero bias.
+
+        sensitive_group_count (int): Number of sensitive groups (2-5).
+
+    Returns:
+        dict: Dictionary with group names as keys and regression parameters as values.
+            Each group has:
+            - 'bias' : float
+            - 'noise_scale' : float
+    """
+    if sensitive_group_count < 2 or sensitive_group_count > 5:
+        raise ValueError(
+            f"Number of sensitive groups must be between 2 and 5, got {sensitive_group_count}"
+        )
+
+    unique_groups = np.arange(sensitive_group_count)
+    group_names = [get_group_name(unique_groups, i)
+                   for i in range(sensitive_group_count)]
+
+    if fairness_type == "Equal MSE":
+        return {name: {"bias": 0.0, "noise_scale": 1.0} for name in group_names}
+
+    if fairness_type == "Group bias":
+        return {
+            name: {"bias": idx * 0.5, "noise_scale": 1.0}
+            for idx, name in enumerate(group_names)
+        }
+
+    if fairness_type == "Heteroscedastic noise":
+        return {
+            name: {"bias": 0.0, "noise_scale": 1.0 + idx}
+            for idx, name in enumerate(group_names)
+        }
+
+    raise ValueError(
+        f"Unsupported regression fairness type: '{fairness_type}'. "
+        "Supported types are: 'Equal MSE', 'Group bias', 'Heteroscedastic noise'"
+    )
+
+
 def get_group_marker(group):
     """
     Map numerical group identifier to matplotlib marker shape.
