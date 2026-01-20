@@ -2,4 +2,5 @@ __pycache__
 .ipynb_checkpoints
 /docs/build
 /dist
+/docs/changes_unfair_regression.md
 /PLAN.md

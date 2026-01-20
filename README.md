@@ -27,21 +27,18 @@
 </p>
 
 <p align="center">
-    <a href="#-about">📋 About</a> •
-    <a href="#-installation">📦 Installation</a> •
-    <a href="#-usage">🚀 Usage</a> •
-    <a href="#️-supported-equality-types">⚖️ Supported Equality Types</a> •
-    <a href="#-unfair-regression">📈 Unfair Regression</a> •
-    <a href="#-community-guidelines">🫂 Community Guidelines</a> •
-    <a href="#-license">📜 License</a>
+    <a href="#-about"> About</a> •
+    <a href="#-installation"> Installation</a> •
+    <a href="#-usage"> Usage</a> •
+    <a href="#-supported-equality-types">⚖️ Supported Equality Types</a> •
+    <a href="#-community-guidelines"> Community Guidelines</a> •
+    <a href="#-license"> License</a>
 </p>
 
-## 📋 About
-**Unfair Data Generator** is a Python library designed for generating **biased classification and regression datasets** with intentional unfairness patterns.
+##  About
+**Unfair Data Generator** is a Python library designed for generating biased **classification and regression** datasets with intentional unfairness patterns. This tool extends scikit-learn's `make_classification` function to include sensitive group information and fairness constraints, and expands the same idea to regression by generating continuous targets with controlled group-dependent bias and noise. ⚖️
 
-The library extends scikit-learn’s `make_classification` to include sensitive group information and fairness constraints, and further expands this approach to **regression tasks** by generating continuous targets with controlled group-dependent bias and noise. ⚖️🧪
-
-**Unfair Data Generator** supports various fairness criteria violations and provides comprehensive tools for visualization and evaluation, making it an essential tool for fairness research and education. 💡
+In short: classification uses discrete labels with group-level outcome disparities, while regression uses continuous targets with group-level error or bias differences. This makes the library useful for both fairness research and education across problem types.
 
 * **Free software:** MIT license
 * **Documentation:** [https://unfair-data-generator.readthedocs.io](https://unfair-data-generator.readthedocs.io)
@@ -58,20 +55,20 @@ The library extends scikit-learn’s `make_classification` to include sensitive 
 - **Multiple Groups**: Support for 2-5 sensitive groups with intuitive weather-based naming. 🌦️
 - **Scikit-learn Compatible**: Extends familiar scikit-learn patterns and interfaces. 🎯
 - **Unfair Regression Support**: Generate regression datasets with controlled group bias and heteroscedastic noise.
-- **Multiple Regression Base Functions**: Linear, logistic, and exponential target generation.
-- **Regression Fairness Metrics**: Group-wise evaluation using MSE, MAE, and Bias.
+- **Multiple Regression Base Functions**: Linear, logistic/sigmoid, and exponential target generation.
+- **Regression Fairness Metrics**: Group-wise evaluation using MAE, RMSE, mean residual, and R2.
 
-## 📦 Installation
+##  Installation
 ### pip
 To install `unfair-data-generator` using pip, run the following command:
 ```bash
 pip install unfair-data-generator
 ```
 
-## 🚀 Usage
-### Unfair Classification Example
-The following example demonstrates how to generate a biased dataset and evaluate fairness using `unfair-data-generator`. More examples can be found in the [examples](./examples) directory.
+##  Usage
+The following examples demonstrate how to generate biased datasets and evaluate fairness using `unfair-data-generator`. More examples can be found in the [examples](./examples) directory.
 
+### Unfair Classification Example
 ```python
 from unfair_data_generator.unfair_classification import make_unfair_classification
 from unfair_data_generator.util.helpers import get_params_for_certain_equality_type
@@ -115,11 +112,9 @@ visualize_accuracy(metrics, title)
 ```
 
 ### Unfair Regression Example
-In addition to classification, the library supports **regression datasets with controlled unfairness**.
-
 ```python
 from unfair_data_generator.unfair_regression import make_unfair_regression
-from unfair_data_generator.util.regression_trainer import train_and_evaluate_regression
+from unfair_data_generator.util.model_trainer import train_and_evaluate_model_with_regressor
 
 X, y, Z = make_unfair_regression(
     n_samples=1000,
@@ -131,151 +126,21 @@ X, y, Z = make_unfair_regression(
     random_state=42
 )
 
-metrics = train_and_evaluate_regression(X, y, Z)
+metrics = train_and_evaluate_model_with_regressor(X, y, Z)
 print(metrics)
 ```
 
 ## ⚖️ Supported Equality Types
-The library supports generating datasets that systematically violate specific fairness criteria. Each type creates different bias patterns:
+The library supports generating classification datasets that systematically violate specific fairness criteria. Each type creates different bias patterns:
 
 - **Equal quality**   
-Different classification performance across groups.
+  Different classification performance across groups.
 - **Demographic parity**  
-Unequal positive prediction rates across groups.
+  Unequal positive prediction rates across groups.
 - **Equal opportunity**  
-Unequal true positive rates across groups.
+  Unequal true positive rates across groups.
 - **Equalized odds**  
-Unequal true positive and false positive rates across groups.
-
----
-
-# 📈 Unfair Regression
-
-In addition to classification, **Unfair Data Generator** supports **regression datasets with controlled unfairness**.
-
-This extension reuses the existing unfair classification pipeline to generate
-feature vectors and sensitive group labels, and then constructs a **continuous regression target**
-with group-dependent behavior.
-
-This enables systematic experimentation with unfairness in **continuous prediction tasks**,
-complementing the existing classification-focused functionality. 📊⚖️
-
----
-
-## 🧠 Regression Design Overview
-
-The regression generator follows a two-stage process:
-
-1. **Feature and group generation**
-   - Reuses the unfair classification generator
-   - Produces:
-     - feature matrix **X**
-     - sensitive group labels **Z**
-
-2. **Target generation**
-   - A shared base regression signal is computed
-   - Group-specific bias and/or noise is injected
-   - Produces a continuous target **y**
-
-This design ensures **controlled unfairness**, **interpretability**, and
-**consistency** with classification datasets.
-
----
-
-## 🔧 Regression Base Functions
-
-The global shape of the regression target can be controlled using different base functions:
-
-- **Linear**
-  - Linear combination of informative features
-  - Serves as the baseline regression setting
-
-- **Logistic**
-  - Non-linear, bounded transformation
-  - Useful for studying saturation effects
-
-- **Exponential**
-  - Non-linear transformation with exponential growth
-  - Highlights scale sensitivity and amplification of unfairness
-
-The base function defines the **global signal**, while unfairness is introduced
-separately via group-specific mechanisms.
-
----
-
-## ⚖️ Regression Unfairness Types
-
-The following unfairness mechanisms are supported:
-
-### **Equal MSE**
-- Equal noise across sensitive groups
-- No systematic bias
-
-Represents a **fair regression setting**.
-
----
-
-### **Group Bias**
-- Group-dependent systematic shift in the target
-- Causes consistent over- or underestimation for certain groups
-
-Models **structural bias** in regression targets.
-
----
-
-### **Heteroscedastic Noise**
-- Group-dependent noise variance
-- Some groups are inherently harder to predict
-
-Models **unequal data quality or measurement noise**.
-
----
-
-## 📊 Regression Fairness Metrics
-
-Regression fairness is evaluated **per sensitive group** using:
-
-### **Mean Squared Error (MSE)**
-- Penalizes large errors
-- Sensitive to variance differences
-
-### **Mean Absolute Error (MAE)**
-- More interpretable error magnitude
-- Indicates typical prediction deviation
-
-### **Bias**
-
-Defined as:
-
-**Bias = E[ŷ − y]**
-
-- Positive bias → systematic overestimation  
-- Negative bias → systematic underestimation  
-
-Differences in these metrics across sensitive groups indicate
-**unfair regression behavior**, even when overall performance appears acceptable.
-
----
-
-## 🚀 Example: Unfair Regression
-
-```python
-from unfair_data_generator.unfair_regression import make_unfair_regression
-from unfair_data_generator.util.regression_trainer import train_and_evaluate_regression
-
-X, y, Z = make_unfair_regression(
-    n_samples=1000,
-    n_features=10,
-    n_informative=3,
-    fairness_type="Group bias",
-    base_function="linear",
-    n_sensitive_groups=3,
-    random_state=42
-)
-
-metrics = train_and_evaluate_regression(X, y, Z)
-print(metrics)
-```
+  Unequal true positive and false positive rates across groups.
 
 ## 🫂 Community Guidelines
 ### Contributing
