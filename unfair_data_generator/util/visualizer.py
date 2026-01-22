@@ -114,6 +114,48 @@ def visualize_regression_metrics(metrics, title):
     return plt
 
 
+def visualize_target_distribution_by_group(y, Z, title="Target distribution by group", kind="box", bins=30):
+    """
+    Visualize the target distribution by sensitive group.
+
+    Parameters:
+        y (ndarray): Continuous target values.
+        Z (ndarray): Sensitive group labels for each sample.
+        title (str): Plot title.
+        kind (str): "box" for boxplot or "hist" for overlaid histograms.
+        bins (int): Number of bins for histogram when kind="hist".
+
+    Returns:
+        matplotlib.pyplot: The matplotlib pyplot object containing the plot.
+    """
+    groups = np.unique(Z)
+
+    plt.figure(figsize=(8, 5))
+
+    group_labels = [get_group_name(groups, g) or f"Group {g}" for g in groups]
+    colors = cm.get_cmap("tab10", len(groups))
+
+    if kind == "box":
+        data = [y[Z == g] for g in groups]
+        box = plt.boxplot(data, labels=group_labels, patch_artist=True)
+        for i, patch in enumerate(box['boxes']):
+            patch.set_facecolor(colors(i))
+            patch.set_alpha(0.7)
+        plt.ylabel("y")
+    elif kind == "hist":
+        for i, g in enumerate(groups):
+            plt.hist(y[Z == g], bins=bins, alpha=0.5, label=group_labels[i], color=colors(i))
+        plt.xlabel("y")
+        plt.ylabel("Count")
+        plt.legend()
+    else:
+        raise ValueError("kind must be 'box' or 'hist'")
+
+    plt.title(title)
+
+    return plt
+
+
 def visualize_groups_separately(X, y, Z, feature1=None, feature2=None, feature1_name=None, feature2_name=None, title="Group-specific visualization"):
     """
     Generate scatter plots for individual groups, showing data points for each class.

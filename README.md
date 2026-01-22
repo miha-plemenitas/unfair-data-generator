@@ -47,16 +47,15 @@ In short: classification uses discrete labels with group-level outcome dispariti
 * **Operating systems**: Windows, Ubuntu, macOS
 
 ## ✨ Features
-- **Biased Dataset Generation**: Create classification datasets with intentional bias across sensitive groups. 🗃️
-- **Fairness Evaluation**: Built-in tools for evaluating model fairness across different groups. ⚖️
+- **Biased Dataset Generation**: Create biased datasets for both classification and regression across sensitive groups. 🗃️
+- **Fairness Evaluation**: Built-in tools for evaluating model fairness across different groups in classifiers and regressors. ⚖️
 - **Visualization**: Visualization capabilities for understanding bias patterns and fairness metrics. 📈
-- **Flexible Configuration**: Support for various equality types (demographic parity, equal opportunity, equal opportunity, equalized odds). ⚙️
+- **Flexible Configuration**: Support for various equality types in classification and regression (demographic parity, equal opportunity, equalized odds; group bias, heteroscedastic noise). ⚙️
 - **Leaky Features**: Generate features that leak sensitive information to simulate real-world bias. 🔓
 - **Multiple Groups**: Support for 2-5 sensitive groups with intuitive weather-based naming. 🌦️
 - **Scikit-learn Compatible**: Extends familiar scikit-learn patterns and interfaces. 🎯
-- **Unfair Regression Support**: Generate regression datasets with controlled group bias and heteroscedastic noise.
-- **Multiple Regression Base Functions**: Linear, logistic/sigmoid, and exponential target generation.
-- **Regression Fairness Metrics**: Group-wise evaluation using MAE, RMSE, mean residual, and R2.
+- **Regression Base Functions**: Linear, logistic/sigmoid, and exponential target generation.
+- **Regression Metrics**: Group-wise evaluation using MAE, RMSE, mean residual, and R2.
 
 ##  Installation
 ### pip
@@ -115,6 +114,7 @@ visualize_accuracy(metrics, title)
 ```python
 from unfair_data_generator.unfair_regression import make_unfair_regression
 from unfair_data_generator.util.model_trainer import train_and_evaluate_model_with_regressor
+from unfair_data_generator.util.visualizer import visualize_regression_metrics
 
 X, y, Z = make_unfair_regression(
     n_samples=1000,
@@ -127,12 +127,18 @@ X, y, Z = make_unfair_regression(
 )
 
 metrics = train_and_evaluate_model_with_regressor(X, y, Z)
+
+# Visualize regression fairness metrics
+title = f"Regression fairness: {n_sensitive_groups} groups"
+visualize_regression_metrics(metrics, title)
+
 print(metrics)
 ```
 
 ## ⚖️ Supported Equality Types
-The library supports generating classification datasets that systematically violate specific fairness criteria. Each type creates different bias patterns:
+The library supports generating classification and regression datasets that systematically violate specific fairness criteria. Each type creates different bias patterns:
 
+### Classification
 - **Equal quality**   
   Different classification performance across groups.
 - **Demographic parity**  
@@ -141,6 +147,15 @@ The library supports generating classification datasets that systematically viol
   Unequal true positive rates across groups.
 - **Equalized odds**  
   Unequal true positive and false positive rates across groups.
+
+### Regression
+Each type creates different group-level bias or error patterns:
+- **Equal MSE**  
+  Same noise scale and zero bias across groups.
+- **Group bias**  
+  Different constant bias per group with equal noise scale.
+- **Heteroscedastic noise**  
+  Different noise scales per group with zero bias.
 
 ## 🫂 Community Guidelines
 ### Contributing

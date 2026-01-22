@@ -3,4 +3,5 @@ __pycache__
 /docs/build
 /dist
 /docs/changes_unfair_regression.md
+/EXPLAIN.md
 /PLAN.md
